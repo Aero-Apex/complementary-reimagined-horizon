@@ -190,11 +190,11 @@ fn shade_water(input: MaterialInput, light_in: vec3<f32>, sun: vec3<f32>) -> vec
     // Unbound-style refraction: bend the world behind the surface by its normal,
     // then let the water's depth absorb the reds and keep the blues.
     if water_refraction && input.face == 1u {
-        let uv = clamp(input.screen + n.xz * 0.014 * water_wave_strength, vec2<f32>(0.001), vec2<f32>(0.999));
+        let uv = clamp(input.screen + n.xz * 0.004 * water_wave_strength, vec2<f32>(0.001), vec2<f32>(0.999));
         let texel = vec2<i32>(uv * frame.resolution);
         let behind = textureLoad(opaque_color, texel, 0).rgb;
-        let absorb = exp(-thick * 0.09) * vec3<f32>(0.78, 0.94, 1.0);
-        body = mix(body, behind * absorb * (0.7 + 0.3 * light_in), 0.55 * (1.0 - f));
+        let absorb = exp(-thick * 0.07) * vec3<f32>(0.82, 0.95, 1.0);
+        body = mix(body, behind * absorb, 0.35 * (1.0 - f));
     }
 
     let r = reflect(view, n);
@@ -213,12 +213,12 @@ fn shade_water(input: MaterialInput, light_in: vec3<f32>, sun: vec3<f32>) -> vec
     // Foam where the surface runs over a shallow floor or meets the shore.
     if water_foam && input.face == 1u {
         let xz = (input.position + frame.camera_position).xz;
-        let shore = 1.0 - smoothstep(0.15, 2.2, thick);
-        let ripple = noise2(xz * 1.6 + vec2<f32>(frame.time * 0.35, 0.0)) * 0.6
-                   + noise2(xz * 4.0 - vec2<f32>(frame.time * 0.2, 0.0)) * 0.4;
-        let foam = shore * smoothstep(0.38, 0.62, ripple) * 0.85;
-        col = mix(col, vec3<f32>(0.85, 0.95, 1.0) * (0.35 + 0.4 * light_in), foam);
-        alpha = max(alpha, foam * 0.7);
+        let shore = (1.0 - smoothstep(0.06, 0.8, thick)) * smoothstep(0.05, 0.4, input.light.y);
+        let ripple = noise2(xz * 2.2 + vec2<f32>(frame.time * 0.3, 0.0)) * 0.65
+                   + noise2(xz * 5.5 - vec2<f32>(frame.time * 0.15, 0.0)) * 0.35;
+        let foam = shore * smoothstep(0.52, 0.72, ripple) * 0.5;
+        col = mix(col, vec3<f32>(0.55, 0.72, 0.80) * (0.5 + 0.5 * light_in), foam);
+        alpha = max(alpha, foam * 0.5);
     }
     return vec4<f32>(max(col, vec3<f32>(0.0)), max(alpha, f));
 }

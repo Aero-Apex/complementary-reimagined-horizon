@@ -55,7 +55,7 @@ fn outline_edge(input: PostInput) -> f32 {
     let px = f32(outline_thickness) / size;
     let p = view_position(input.uv, input.depth);
     let dist = length(p);
-    if dist > 160.0 {
+    if dist > 96.0 {
         return 0.0;
     }
     var edge = 0.0;
@@ -66,13 +66,17 @@ fn outline_edge(input: PostInput) -> f32 {
         }
         let d = depth_at(uv);
         if d <= 0.0 {
-            edge = max(edge, 1.0);
+            // A silhouette against the sky, but only near by: distant
+            // foliage against the sky must not speckle the whole picture.
+            edge = max(edge, 1.0 - smoothstep(24.0, 64.0, dist));
             continue;
         }
         let q = view_position(uv, d);
-        let gap = abs(length(q) - dist);
-        let threshold = 0.12 + dist * 0.02;
-        edge = max(edge, smoothstep(threshold, threshold * 3.0, gap));
+        // One-sided: only a foreground pixel against a clearly farther
+        // background is an edge; cutout interiors never cross the threshold.
+        let gap = length(q) - dist;
+        let threshold = 0.4 + dist * 0.06;
+        edge = max(edge, smoothstep(threshold, threshold * 4.0, gap));
     }
     return edge * outline_strength;
 }
@@ -85,9 +89,8 @@ fn post(input: PostInput) -> vec4<f32> {
     if outlines {
         let edge = outline_edge(input);
         if edge > 0.0 {
-            // A dark rim with a faint violet lift, in the spirit of Unbound's outline.
-            c = mix(c, vec3<f32>(0.006, 0.005, 0.012), edge * 0.75);
-            c += lin(vec3<f32>(0.30, 0.16, 0.45)) * edge * 0.25;
+            // A thin, neutral dark rim — no purple glow on every leaf.
+            c = mix(c, vec3<f32>(0.02, 0.02, 0.03), edge);
         }
     }
     if bloom > 0.0 {
