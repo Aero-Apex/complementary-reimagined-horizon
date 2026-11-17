@@ -7,21 +7,27 @@ reimplementation of Minecraft Java Edition. Written from scratch in WGSL — no
 GLSL from the original pack is used. Not made or endorsed by EminGT or the
 Complementary team.
 
-This is the first public release, tagged **v1**. It is packaged from the
-completely re-imagined 2.0 source tree with **every setting maxed out**:
-shadow resolution 4096, shadow distance 192 blocks, very soft shadows, all
-effects enabled, and every numeric option at its maximum value. The pack's
-internal version string remains `2.0.0`; `v1` is the release tag.
+This is the first public release, tagged **v1**. Both shader API variants are
+included:
+
+| Asset | API | Source | Notes |
+|-------|-----|--------|-------|
+| `complementary_reimagined-1.0.0.hshader` | **0.2** | completely re-imagined 2.0 source | Every setting maxed out: shadow resolution 4096, shadow distance 192 blocks, very soft shadows, all effects enabled, every numeric option at its maximum. Internal version `2.0.0`. |
+| `complementary_reimagined_01-1.0.0.hshader` | **0.1** | original 1.0.0 build | For older native Horizon builds that only serve API 0.1 (e.g. `66f3981`). Internal version `1.0.0`. |
+
+`v1` is the release tag, not the pack's internal version.
 
 ## Install
 
-Download `complementary_reimagined-1.0.0.hshader` from the **v1** release, copy
-it into the `shaderpacks/` folder beside your `options.txt`, and select it under
+Download the asset for your Horizon build from the **v1** release, copy it into
+the `shaderpacks/` folder beside your `options.txt`, and select it under
 Options → Video Settings → Shaders → Shader Packs.
 
-API 0.2 packs need `HORIZON_HDR_FRAME=float` on older Horizon builds; newer
-builds draw them without it. Max settings are demanding — if frames drop, lower
-shadow quality/distance and reflections in the pack's in-game settings screen.
+- **0.2 asset:** needs `HORIZON_HDR_FRAME=float` on older Horizon builds; newer
+  builds draw it without it. Max settings are demanding — if frames drop, lower
+  shadow quality/distance and reflections in the pack's in-game settings screen.
+- **0.1 asset:** for native builds that only serve API 0.1; no HDR frame switch
+  needed.
 
 ## What it does
 
@@ -53,7 +59,8 @@ Shadows, World and Picture.
 | `sky.wgsl`, `vertex.wgsl`, `material.wgsl`, `weather.wgsl` | Main render stages |
 | `post/*.wgsl` | Ambient occlusion, light shafts, composite, bloom and final grade |
 | `tonemap.wgsl` | Lottes filmic tone curve |
-| `complementary_reimagined-1.0.0.hshader` | Packaged, ready-to-install pack (v1 release artifact) |
+| `complementary_reimagined-1.0.0.hshader` | Packaged API 0.2 pack, all settings maxed (v1 release artifact) |
+| `complementary_reimagined_01-1.0.0.hshader` | Packaged API 0.1 pack for older native builds (v1 release artifact) |
 
 Rebuild the package with:
 
