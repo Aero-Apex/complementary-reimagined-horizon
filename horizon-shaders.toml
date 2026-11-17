@@ -1,0 +1,451 @@
+schema = 1
+id = "complementary_reimagined"
+name = "Complementary Reimagined"
+version = "2.0.0"
+api = "0.2"
+description = "A full Horizon port of the Complementary Reimagined look for shader API 0.2 (linear light): a deep sky with its own two-layer clouds, soft coloured shadows, light shafts, ambient occlusion, warm and coloured block light, light through leaves, waving plants and water, rain puddles, glowing ores, LabPBR support, bloom and a filmic tone curve that opens up in caves. Needs HORIZON_HDR_FRAME=float, like every 0.2 pack."
+authors = ["Complementary Reimagined (original look, by EminGT)", "Horizon port"]
+license = "Original WGSL work inspired by the look of Complementary Reimagined (Complementary License Agreement 1.7); no GLSL from the original pack is used"
+shared = ["common.wgsl"]
+
+[sky]
+file = "sky.wgsl"
+name = "Sky and clouds"
+clouds = true
+
+[material]
+file = "material.wgsl"
+name = "Terrain lighting"
+
+[vertex]
+file = "vertex.wgsl"
+
+[weather]
+file = "weather.wgsl"
+
+[shadow]
+resolution = 4096
+distance = 192.0
+option = "shadows"
+resolution_option = "shadow_quality"
+distance_option = "shadow_distance"
+
+[[post]]
+file = "post/ao.wgsl"
+name = "Ambient occlusion (half size)"
+output = "t_ao"
+scale = 0.5
+
+[[post]]
+file = "post/shafts.wgsl"
+name = "Light shafts (half size)"
+output = "t_shafts"
+scale = 0.5
+
+[[post]]
+file = "post/composite.wgsl"
+name = "Occlusion, haze and shafts"
+
+[[post]]
+file = "post/bloom_down.wgsl"
+name = "Bloom: bright parts (quarter size)"
+output = "t_bloom_a"
+scale = 0.25
+
+[[post]]
+file = "post/bloom_blur.wgsl"
+name = "Bloom: blur (quarter size)"
+output = "t_bloom_b"
+scale = 0.25
+
+[[post]]
+file = "post/final.wgsl"
+name = "Edges, bloom and grade"
+
+[tonemap]
+file = "tonemap.wgsl"
+name = "Lottes filmic curve"
+
+[frame]
+blend = "linear"
+
+[reflection]
+option = "water_reflections"
+
+# ---------------------------------------------------------------- materials
+
+# Leaves: sway, and light shines through them.
+[[materials]]
+id = 1
+sprites = ["block/*_leaves", "block/vine", "block/*_vines", "block/*_vines_plant", "block/azalea_leaves", "block/flowering_azalea_leaves"]
+
+# Plants: bend at the top, lit from both sides.
+[[materials]]
+id = 2
+sprites = [
+    "block/short_grass", "block/tall_grass_*", "block/fern", "block/large_fern_*",
+    "block/dandelion", "block/poppy", "block/blue_orchid", "block/allium", "block/azure_bluet",
+    "block/*_tulip", "block/oxeye_daisy", "block/cornflower", "block/lily_of_the_valley",
+    "block/wither_rose", "block/torchflower", "block/pink_petals", "block/sunflower_*",
+    "block/lilac_*", "block/rose_bush_*", "block/peony_*", "block/pitcher_*",
+    "block/wheat_stage*", "block/carrots_stage*", "block/potatoes_stage*", "block/beetroots_stage*",
+    "block/sweet_berry_bush_stage*", "block/sugar_cane", "block/dead_bush", "block/short_dry_grass",
+    "block/tall_dry_grass", "block/bush", "block/firefly_bush", "block/*_sapling",
+    "block/seagrass", "block/tall_seagrass_*", "block/kelp", "block/kelp_plant",
+]
+
+# Ores: their bright spots glow with "Glowing ores" on.
+[[materials]]
+id = 4
+sprites = [
+    "block/coal_ore", "block/iron_ore", "block/copper_ore", "block/gold_ore", "block/redstone_ore",
+    "block/emerald_ore", "block/lapis_ore", "block/diamond_ore",
+    "block/deepslate_*_ore", "block/nether_gold_ore", "block/nether_quartz_ore", "block/ancient_debris_side",
+    "block/ancient_debris_top",
+]
+
+# ---------------------------------------------------------------- coloured block light
+
+[[lights]]
+color = [1.0, 0.62, 0.32]
+blocks = ["torch", "wall_torch", "lantern", "jack_o_lantern", "*candle", "*candle_cake", "copper_torch", "copper_wall_torch", "copper_lantern"]
+
+[[lights]]
+color = [0.35, 0.75, 1.0]
+blocks = ["soul_torch", "soul_wall_torch", "soul_lantern", "soul_fire", "soul_campfire"]
+
+[[lights]]
+color = [1.0, 0.22, 0.12]
+blocks = ["redstone_torch", "redstone_wall_torch", "redstone_lamp", "redstone_ore", "deepslate_redstone_ore"]
+
+[[lights]]
+color = [0.55, 0.95, 1.0]
+blocks = ["sea_lantern", "conduit", "beacon"]
+
+[[lights]]
+color = [0.75, 0.45, 1.0]
+blocks = ["amethyst_cluster", "large_amethyst_bud", "medium_amethyst_bud", "crying_obsidian", "respawn_anchor", "nether_portal", "end_gateway"]
+
+[[lights]]
+color = [1.0, 0.95, 0.85]
+blocks = ["end_rod", "pearlescent_froglight"]
+
+[[lights]]
+color = [0.70, 1.0, 0.45]
+blocks = ["verdant_froglight", "glow_lichen"]
+
+[[lights]]
+color = [1.0, 0.85, 0.35]
+blocks = ["ochre_froglight", "glowstone", "shroomlight"]
+
+[[lights]]
+color = [1.0, 0.42, 0.08]
+blocks = ["lava", "magma_block", "fire", "campfire"]
+
+[[lights]]
+color = [0.30, 0.95, 0.85]
+blocks = ["sculk_catalyst", "sculk_sensor", "calibrated_sculk_sensor", "warped_*"]
+
+# ---------------------------------------------------------------- options: light
+
+[[options]]
+id = "sun_strength"
+name = "Sunlight"
+type = "float"
+default = 1.6
+min = 0.5
+max = 1.6
+step = 0.05
+
+[[options]]
+id = "ambient_strength"
+name = "Sky light"
+description = "How much the open sky lights what the sun doesn't."
+type = "float"
+default = 1.8
+min = 0.4
+max = 1.8
+step = 0.05
+
+[[options]]
+id = "night_brightness"
+name = "Moonlight"
+description = "How bright the Overworld is at night."
+type = "float"
+default = 2.5
+min = 0.3
+max = 2.5
+step = 0.1
+
+[[options]]
+id = "min_light"
+name = "Cave light"
+description = "The least light anywhere: 0 is pitch black caves."
+type = "float"
+default = 3.0
+min = 0.0
+max = 3.0
+step = 0.1
+
+[[options]]
+id = "torch_warmth"
+name = "Torch warmth"
+description = "How orange block light is."
+type = "float"
+default = 1.0
+min = 0.0
+max = 1.0
+step = 0.05
+
+[[options]]
+id = "block_light_strength"
+name = "Block light"
+type = "float"
+default = 2.0
+min = 0.4
+max = 2.0
+step = 0.05
+
+[[options]]
+id = "subsurface"
+name = "Light through leaves"
+type = "bool"
+default = true
+
+[[options]]
+id = "glowing_ores"
+name = "Glowing ores"
+description = "The coloured spots of ores glow faintly."
+type = "bool"
+default = true
+
+[[options]]
+id = "use_pbr"
+name = "LabPBR maps"
+description = "Use the normal and specular maps of a resource pack that has them."
+type = "bool"
+default = true
+
+# ---------------------------------------------------------------- options: shadows
+
+[[options]]
+id = "shadows"
+name = "Shadows"
+description = "Sun and moon shadows. Off is the fastest setting."
+type = "bool"
+default = true
+
+[[options]]
+id = "shadow_quality"
+name = "Shadow resolution"
+type = "choice"
+values = ["1024", "2048", "3072", "4096"]
+default = "4096"
+
+[[options]]
+id = "shadow_distance"
+name = "Shadow distance"
+description = "How far from you shadows reach, in blocks."
+type = "choice"
+values = ["64", "96", "128", "192"]
+default = "192"
+
+[[options]]
+id = "shadow_filter"
+name = "Shadow softness"
+type = "choice"
+values = ["Sharp", "Soft", "Very soft"]
+default = "Very soft"
+
+[[options]]
+id = "light_shafts"
+name = "Light shafts"
+description = "Sunbeams through the air, strongest at dawn, dusk and after rain."
+type = "float"
+default = 2.0
+min = 0.0
+max = 2.0
+step = 0.1
+
+# ---------------------------------------------------------------- options: world
+
+[[options]]
+id = "waving_plants"
+name = "Waving plants"
+type = "bool"
+default = true
+
+[[options]]
+id = "waving_water"
+name = "Waving water"
+type = "bool"
+default = true
+
+[[options]]
+id = "water_reflections"
+name = "Water reflections"
+description = "Mirror the world in water. Draws the world a second time at half size."
+type = "bool"
+default = true
+
+[[options]]
+id = "water_clarity"
+name = "Water clarity"
+type = "float"
+default = 1.0
+min = 0.0
+max = 1.0
+step = 0.05
+
+[[options]]
+id = "puddles"
+name = "Rain puddles"
+type = "bool"
+default = true
+
+[[options]]
+id = "cloud_amount"
+name = "Clouds"
+description = "How much of the sky the clouds cover; 0 has none."
+type = "float"
+default = 1.0
+min = 0.0
+max = 1.0
+step = 0.05
+
+[[options]]
+id = "cloud_height"
+name = "Cloud height"
+type = "float"
+default = 320.0
+min = 128.0
+max = 320.0
+step = 8.0
+
+[[options]]
+id = "high_clouds"
+name = "High clouds"
+type = "bool"
+default = true
+
+[[options]]
+id = "haze"
+name = "Haze"
+description = "Distance haze in the colour of the sky."
+type = "float"
+default = 2.0
+min = 0.0
+max = 2.0
+step = 0.1
+
+# ---------------------------------------------------------------- options: picture
+
+[[options]]
+id = "ambient_occlusion"
+name = "Ambient occlusion"
+description = "Soft shade in corners and under overhangs."
+type = "bool"
+default = true
+
+[[options]]
+id = "ao_strength"
+name = "Occlusion strength"
+type = "float"
+default = 1.5
+min = 0.2
+max = 1.5
+step = 0.05
+
+[[options]]
+id = "bloom"
+name = "Bloom"
+description = "The glow around the sun, lava, torches and glowing blocks."
+type = "float"
+default = 1.0
+min = 0.0
+max = 1.0
+step = 0.01
+
+[[options]]
+id = "exposure"
+name = "Exposure"
+type = "float"
+default = 2.0
+min = 0.5
+max = 2.0
+step = 0.05
+
+[[options]]
+id = "auto_exposure"
+name = "Eye adjustment"
+description = "The picture opens up in caves and at night."
+type = "bool"
+default = true
+
+[[options]]
+id = "saturation"
+name = "Saturation"
+type = "float"
+default = 1.6
+min = 0.5
+max = 1.6
+step = 0.05
+
+[[options]]
+id = "contrast"
+name = "Contrast"
+type = "float"
+default = 1.4
+min = 0.7
+max = 1.4
+step = 0.02
+
+[[options]]
+id = "vignette"
+name = "Vignette"
+type = "float"
+default = 1.0
+min = 0.0
+max = 1.0
+step = 0.05
+
+[[options]]
+id = "smooth_edges"
+name = "Smooth edges"
+description = "An edge smoother, since Horizon's own anti-aliasing is off while a pack draws the frame."
+type = "bool"
+default = true
+
+# ---------------------------------------------------------------- pages
+
+[[pages]]
+id = "main"
+name = "Complementary Reimagined"
+items = ["page:lighting", "page:shadows", "page:world", "page:picture"]
+
+[[pages]]
+id = "lighting"
+name = "Lighting"
+description = "Sun, sky, torches and glowing blocks."
+items = ["sun_strength", "ambient_strength", "night_brightness", "min_light", "torch_warmth", "block_light_strength", "subsurface", "glowing_ores", "use_pbr"]
+
+[[pages]]
+id = "shadows"
+name = "Shadows"
+description = "Shadows and sunbeams: what costs frames."
+items = ["shadows", "shadow_quality", "shadow_distance", "shadow_filter", "light_shafts"]
+
+[[pages]]
+id = "world"
+name = "World"
+description = "Plants, water, rain, clouds and haze."
+items = ["waving_plants", "waving_water", "water_reflections", "water_clarity", "puddles", "cloud_amount", "cloud_height", "high_clouds", "haze"]
+
+[[pages]]
+id = "picture"
+name = "Picture"
+description = "Occlusion, bloom and colour."
+items = ["ambient_occlusion", "ao_strength", "bloom", "exposure", "auto_exposure", "saturation", "contrast", "vignette", "smooth_edges"]
+
+[budget]
+gpu_ms = 6.0
