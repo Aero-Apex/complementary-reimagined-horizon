@@ -7,6 +7,14 @@ override saturation: f32 = 1.1;
 override contrast: f32 = 1.06;
 override vignette: f32 = 0.35;
 override smooth_edges: bool = true;
+override outlines: bool = true;
+override outline_thickness: u32 = 2u;
+override outline_strength: f32 = 0.9;
+
+const OUTLINE_DIRS: array<vec2<f32>, 8> = array<vec2<f32>, 8>(
+    vec2<f32>(1.0, 0.0), vec2<f32>(-1.0, 0.0), vec2<f32>(0.0, 1.0), vec2<f32>(0.0, -1.0),
+    vec2<f32>(0.7, 0.7), vec2<f32>(-0.7, 0.7), vec2<f32>(0.7, -0.7), vec2<f32>(-0.7, -0.7),
+);
 
 fn tap(uv: vec2<f32>) -> vec3<f32> {
     return textureSampleLevel(previous, linear_sampler, uv, 0.0).rgb;
@@ -36,10 +44,51 @@ fn smoothed(uv: vec2<f32>, center: vec3<f32>) -> vec3<f32> {
     return mix(center, blend, 0.55);
 }
 
+// Silhouette outlines: where the depth jumps, something in front ends against
+// what is behind it (terrain, entities, items). The API has no entity-ID mask,
+// so this is a depth-based rim rather than a per-entity coloured outline.
+fn outline_edge(input: PostInput) -> f32 {
+    if !outlines || input.depth <= 0.0 {
+        return 0.0;
+    }
+    let size = vec2<f32>(textureDimensions(scene_depth));
+    let px = f32(outline_thickness) / size;
+    let p = view_position(input.uv, input.depth);
+    let dist = length(p);
+    if dist > 160.0 {
+        return 0.0;
+    }
+    var edge = 0.0;
+    for (var i = 0; i < 8; i++) {
+        let uv = input.uv + OUTLINE_DIRS[i] * px;
+        if any(uv < vec2<f32>(0.0)) || any(uv > vec2<f32>(1.0)) {
+            continue;
+        }
+        let d = depth_at(uv);
+        if d <= 0.0 {
+            edge = max(edge, 1.0);
+            continue;
+        }
+        let q = view_position(uv, d);
+        let gap = abs(length(q) - dist);
+        let threshold = 0.12 + dist * 0.02;
+        edge = max(edge, smoothstep(threshold, threshold * 3.0, gap));
+    }
+    return edge * outline_strength;
+}
+
 fn post(input: PostInput) -> vec4<f32> {
     var c = input.color.rgb;
     if smooth_edges {
         c = smoothed(input.uv, c);
+    }
+    if outlines {
+        let edge = outline_edge(input);
+        if edge > 0.0 {
+            // A dark rim with a faint violet lift, in the spirit of Unbound's outline.
+            c = mix(c, vec3<f32>(0.006, 0.005, 0.012), edge * 0.75);
+            c += lin(vec3<f32>(0.30, 0.16, 0.45)) * edge * 0.25;
+        }
     }
     if bloom > 0.0 {
         c += textureSampleLevel(t_bloom_b, linear_sampler, input.uv, 0.0).rgb * bloom * 1.8;

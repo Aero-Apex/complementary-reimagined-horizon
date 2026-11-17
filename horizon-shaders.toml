@@ -1,9 +1,9 @@
 schema = 1
 id = "complementary_reimagined"
 name = "Complementary Reimagined"
-version = "2.0.0"
+version = "2.1.0"
 api = "0.2"
-description = "A full Horizon port of the Complementary Reimagined look for shader API 0.2 (linear light): a deep sky with its own two-layer clouds, soft coloured shadows, light shafts, ambient occlusion, warm and coloured block light, light through leaves, waving plants and water, rain puddles, glowing ores, LabPBR support, bloom and a filmic tone curve that opens up in caves. Needs HORIZON_HDR_FRAME=float, like every 0.2 pack."
+description = "A full Horizon port of the Complementary Reimagined look for shader API 0.2 (linear light): a deep sky with its own two-layer clouds, soft or pixelated coloured shadows, light shafts, ambient occlusion, silhouette outlines, warm and coloured block light, light through leaves, waving plants and water, Unbound-style water with foam and refraction, rain puddles, glowing ores, LabPBR support, bloom and a filmic tone curve that opens up in caves. Needs HORIZON_HDR_FRAME=float, like every 0.2 pack."
 authors = ["Complementary Reimagined (original look, by EminGT)", "Horizon port"]
 license = "Original WGSL work inspired by the look of Complementary Reimagined (Complementary License Agreement 1.7); no GLSL from the original pack is used"
 shared = ["common.wgsl"]
@@ -253,9 +253,10 @@ default = "192"
 [[options]]
 id = "shadow_filter"
 name = "Shadow softness"
+description = "Pixelated gives crisp, blocky shadows; the others soften them."
 type = "choice"
-values = ["Sharp", "Soft", "Very soft"]
-default = "Very soft"
+values = ["Sharp", "Soft", "Very soft", "Pixelated"]
+default = "Pixelated"
 
 [[options]]
 id = "light_shafts"
@@ -416,6 +417,64 @@ description = "An edge smoother, since Horizon's own anti-aliasing is off while 
 type = "bool"
 default = true
 
+# ---------------------------------------------------------------- options: v1.1 additions
+
+[[options]]
+id = "outlines"
+name = "Outlines"
+description = "Dark rims on silhouettes so objects stand out from the scene."
+type = "bool"
+default = true
+
+[[options]]
+id = "outline_thickness"
+name = "Outline thickness"
+type = "choice"
+values = ["1", "2", "3"]
+default = "2"
+
+[[options]]
+id = "outline_strength"
+name = "Outline strength"
+type = "float"
+default = 0.9
+min = 0.0
+max = 2.0
+step = 0.05
+
+[[options]]
+id = "colored_light"
+name = "Coloured light"
+description = "How strongly coloured block light tints nearby surfaces."
+type = "float"
+default = 2.2
+min = 0.0
+max = 4.0
+step = 0.05
+
+[[options]]
+id = "water_foam"
+name = "Water foam"
+description = "Pale foam along the shore and where water breaks over obstacles."
+type = "bool"
+default = true
+
+[[options]]
+id = "water_refraction"
+name = "Water refraction"
+description = "Bend the view through the water's surface."
+type = "bool"
+default = true
+
+[[options]]
+id = "water_wave_strength"
+name = "Wave strength"
+type = "float"
+default = 1.2
+min = 0.0
+max = 2.0
+step = 0.05
+
 # ---------------------------------------------------------------- pages
 
 [[pages]]
@@ -427,7 +486,7 @@ items = ["page:lighting", "page:shadows", "page:world", "page:picture"]
 id = "lighting"
 name = "Lighting"
 description = "Sun, sky, torches and glowing blocks."
-items = ["sun_strength", "ambient_strength", "night_brightness", "min_light", "torch_warmth", "block_light_strength", "subsurface", "glowing_ores", "use_pbr"]
+items = ["sun_strength", "ambient_strength", "night_brightness", "min_light", "torch_warmth", "block_light_strength", "colored_light", "subsurface", "glowing_ores", "use_pbr"]
 
 [[pages]]
 id = "shadows"
@@ -439,13 +498,13 @@ items = ["shadows", "shadow_quality", "shadow_distance", "shadow_filter", "light
 id = "world"
 name = "World"
 description = "Plants, water, rain, clouds and haze."
-items = ["waving_plants", "waving_water", "water_reflections", "water_clarity", "puddles", "cloud_amount", "cloud_height", "high_clouds", "haze"]
+items = ["waving_plants", "waving_water", "water_reflections", "water_clarity", "water_foam", "water_refraction", "water_wave_strength", "puddles", "cloud_amount", "cloud_height", "high_clouds", "haze"]
 
 [[pages]]
 id = "picture"
 name = "Picture"
 description = "Occlusion, bloom and colour."
-items = ["ambient_occlusion", "ao_strength", "bloom", "exposure", "auto_exposure", "saturation", "contrast", "vignette", "smooth_edges"]
+items = ["ambient_occlusion", "ao_strength", "outlines", "outline_thickness", "outline_strength", "bloom", "exposure", "auto_exposure", "saturation", "contrast", "vignette", "smooth_edges"]
 
 [budget]
 gpu_ms = 6.0
