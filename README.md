@@ -1,4 +1,4 @@
-# Complementary Reimagined for Horizon — v1.1.1
+# Complementary Reimagined for Horizon — v1.2 (fully maxed)
 
 A native Horizon shader pack (WGSL) that brings the *look* of
 [Complementary Reimagined](https://www.complementary.dev/) by EminGT — plus a few
@@ -7,50 +7,38 @@ the Rust reimplementation of Minecraft Java Edition. Written from scratch in WGS
 no GLSL from the original pack is used. Not made or endorsed by EminGT or the
 Complementary team.
 
+**v1.2 is the "fully maxed" build:** every option's default is set to its maximum
+value — 4096 shadows at 192 blocks, pixelated shadows, every effect on, and all
+intensity/colour sliders at their max. The rendering fixes from v1.1.1 (clean
+one-sided outlines, subtle foam and refraction) are kept. Expect a very bright,
+very saturated picture and a heavy GPU cost; all sliders can be lowered in-game.
+
 ## Assets
 
 | Asset | API | Pack version | Notes |
 |-------|-----|--------------|-------|
-| `complementary_reimagined-1.1.1.hshader` | **0.2** | `2.1.1` | Current release — v1.1 features with the rendering fixes below |
-| `complementary_reimagined-1.1.0.hshader` | **0.2** | `2.1.0` | First v1.1 build (kept for comparison) |
+| `complementary_reimagined-1.2.0.hshader` | **0.2** | `2.2.0` | Current — fully maxed, with v1.1 features and v1.1.1 fixes |
+| `complementary_reimagined-1.1.1.hshader` | **0.2** | `2.1.1` | Sane-default version with the rendering fixes |
+| `complementary_reimagined-1.1.0.hshader` | **0.2** | `2.1.0` | First v1.1 build |
 | `complementary_reimagined-1.0.0.hshader` | **0.2** | `2.0.0` | Original v1 release |
 | `complementary_reimagined_01-1.0.0.hshader` | **0.1** | `1.0.0` | Legacy build for older native Horizon builds that only serve API 0.1 |
 
-Release tags (`v1`, `v1.1`, `v1.1.1`) are not the packs' internal versions.
+Release tags (`v1`, `v1.1`, `v1.1.1`, `v1.2`) are not the packs' internal versions.
 
-## What's fixed in v1.1.1
+## Features
 
-- **Outlines no longer speckle foliage** — one-sided depth comparison with a much
-  larger threshold, sky silhouettes limited to nearby geometry, 1 px default, and
-  a thin neutral rim instead of a violet glow on every leaf.
-- **Foam no longer paints white blocks** — only a very shallow band can foam, with
-  a higher noise threshold and a pale blue-grey colour.
-- **Water refraction is subtle** — much smaller UV offset and no second lighting
-  of the already-lit `opaque_color`; the striped smear is gone.
-- **No more blown-out picture** — intensity sliders (exposure, bloom, light shafts,
-  saturation, contrast, vignette, coloured light, AO) are back to sane defaults.
-  Feature and quality settings (shadows, reflections, glowing ores, LabPBR and
-  pixelated shadows) stay on; every slider can still be maxed in-game.
-
-## Features added in v1.1
-
-- **Silhouette outlines** — dark rims on depth discontinuities so terrain,
-  entities and items stand out. Tunable thickness and strength. *Limitation:*
-  shader API 0.2 exposes no entity-ID or outline mask, so these are depth-based
-  silhouettes rather than per-entity coloured outlines. Horizon draws its own
-  entity glow outlines separately, after the pack's post chain.
-- **Coloured light** — a `Coloured light` strength option scales `colored_light`
-  from blocks, particle lights and mods; torch colour blends toward
-  `block_light_color`.
-- **Pixelated shadows** — a `Shadow softness` choice that snaps the shadow map to
-  4×4 texel blocks for crisp, classic blocky shadows. Sharp, Soft and Very soft
-  remain available.
-- **Unbound-style water** — refraction of the world behind the surface (via
-  `opaque_color`), animated shore foam, stronger wave normals and a wave-strength
-  option, on top of the existing depth tint, reflections and sun glint.
-
-All options live in the pack's settings screen, in four pages: Lighting, Shadows,
-World and Picture.
+- **Silhouette outlines** — dark rims on depth discontinuities, tunable thickness
+  and strength. *Limitation:* shader API 0.2 exposes no entity-ID or outline mask,
+  so these are depth-based silhouettes, not per-entity coloured outlines. Horizon
+  draws its own entity glow outlines separately, after the pack's post chain.
+- **Coloured light** — `Coloured light` strength scales `colored_light` from blocks,
+  particle lights and mods; torch colour blends toward `block_light_color`.
+- **Pixelated shadows** — `Shadow softness` snaps the shadow map to 4×4 texel
+  blocks for crisp blocky shadows. Sharp, Soft and Very soft remain available.
+- **Unbound-style water** — refraction via `opaque_color`, animated shore foam,
+  stronger wave normals and wave-strength option, depth tint, reflections and glint.
+- Plus the original v1/v1.1 feature set: two-layer clouds, light shafts, AO,
+  puddles, glowing ores, LabPBR, rain, filmic tonemap and the full options screen.
 
 ## Install
 
@@ -58,30 +46,19 @@ Copy the `.hshader` for your Horizon build into the `shaderpacks/` folder beside
 `options.txt` and select it under Options → Video Settings → Shaders → Shader Packs.
 
 - **0.2 assets:** need `HORIZON_HDR_FRAME=float` on older Horizon builds; newer
-  builds draw them without it. If frames drop, lower shadow quality/distance,
-  reflections or refraction in-game.
+  builds draw them without it. The asteroid-test instance is already configured
+  with a 9f42064 native build, HDR on and that env var set.
 - **0.1 asset:** for native builds that only serve API 0.1; no HDR frame switch.
 
 The pack is selected by id (`complementary_reimagined`), so switching between the
 0.2 assets needs no settings change. The 0.1 pack has id
 `complementary_reimagined_01` and appears as a separate entry.
 
-## Source layout
-
-| File | Purpose |
-|------|---------|
-| `horizon-shaders.toml` | Metadata, stages, materials, lights, options and pages |
-| `common.wgsl` | Shared helpers and the sky gradient |
-| `sky.wgsl`, `vertex.wgsl`, `material.wgsl`, `weather.wgsl` | Main render stages |
-| `post/*.wgsl` | AO, light shafts, composite, bloom, final grade and outlines |
-| `tonemap.wgsl` | Lottes filmic tone curve |
-| `complementary_reimagined-1.1.1.hshader` | Packaged current artifact |
-
-Rebuild and validate with:
+## Rebuild
 
 ```bash
-horizon-shader pack . --out complementary_reimagined-1.1.1.hshader
-horizon-shader check . complementary_reimagined-1.1.1.hshader
+horizon-shader pack . --out complementary_reimagined-1.2.0.hshader
+horizon-shader check . complementary_reimagined-1.2.0.hshader
 ```
 
 ## License
