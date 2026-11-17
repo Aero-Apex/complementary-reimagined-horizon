@@ -87,9 +87,10 @@ fn post(input: PostInput) -> vec4<f32> {
         c = smoothed(input.uv, c);
     }
     if outlines {
-        let edge = outline_edge(input);
+        // Clamp: the strength option can exceed 1, and mix() would extrapolate
+        // past the dark colour into negative light instead of a dark rim.
+        let edge = min(outline_edge(input), 1.0);
         if edge > 0.0 {
-            // A thin, neutral dark rim — no purple glow on every leaf.
             c = mix(c, vec3<f32>(0.02, 0.02, 0.03), edge);
         }
     }
